@@ -64,6 +64,25 @@ public class MyLinkedHashSet<T> implements Set<T> {
         _last = _root;
     }
 
+    /** 
+     * Конструктор. Создаёт {@code MyLinkedHasSet} c содержимым заданной коллекции 
+     * 
+     * @param c - коллекция
+     */
+    public MyLinkedHashSet(Collection<? extends T> c) {
+        _size = 0;
+        _hashTable = new Vector<MySetNode<T>>(HASH_TABLE_SIZE);
+        for (int i = 0; i < HASH_TABLE_SIZE; i++) {
+            _hashTable.add(null);
+        }
+        _root = new MySetNode<T>(null);
+        _last = _root;
+
+        for (T t : c) {
+            add(t);
+        }
+    }
+
     /**
      * Добавление нового элемента в коллекцию
      * 
@@ -124,8 +143,6 @@ public class MyLinkedHashSet<T> implements Set<T> {
     */
     @Override
     public void clear() {
-        MySetNode<T> node = _root._next;
-
        for (T t : this) {
            remove(t);
        }
@@ -144,10 +161,12 @@ public class MyLinkedHashSet<T> implements Set<T> {
     public boolean contains(Object o) {
         int index = abs(o.hashCode()) % HASH_TABLE_SIZE;
         MySetNode<T> node = _hashTable.get(index);
+        boolean status;
 
         if (node == null) {
             return false;
-        } else {
+        } 
+        else {
             while (node != null) {
                 if (o.equals(node._data)) {
                     return true;
@@ -155,7 +174,6 @@ public class MyLinkedHashSet<T> implements Set<T> {
                     node = node._nextInHashTable;
                 }
             }
-
             return false;
         }
     }
@@ -228,6 +246,7 @@ public class MyLinkedHashSet<T> implements Set<T> {
             else {
                 nodePrevInHashTable._nextInHashTable = (node == null) ? null : node._nextInHashTable;
             }
+
             _size--;
 
             return true;
