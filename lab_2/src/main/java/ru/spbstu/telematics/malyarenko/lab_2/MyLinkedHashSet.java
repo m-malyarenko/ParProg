@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
 
+import static java.lang.Math.abs;
+
 public class MyLinkedHashSet<T> implements Set<T> {
 
     /** Хеш-таблица */
@@ -20,7 +22,7 @@ public class MyLinkedHashSet<T> implements Set<T> {
     private MySetNode<T> _last;
 
     /** Размер коллекции */
-    private int _size;
+    private byte _size;
 
     /**
      * Класс узла <code>MyLinkedHashSet</code>
@@ -49,9 +51,15 @@ public class MyLinkedHashSet<T> implements Set<T> {
         }
     } // MySetNode
 
-    public MyLinkedHashSet(T value) {
+    /** 
+     * Конструктор. Создаёт пустую коллекуию {@code MyLinkedHasSet} 
+     */
+    public MyLinkedHashSet() {
         _size = 0;
         _hashTable = new Vector<MySetNode<T>>(HASH_TABLE_SIZE);
+        for (int i = 0; i < HASH_TABLE_SIZE; i++) {
+            _hashTable.add(null);
+        }
         _root = new MySetNode<T>(null);
         _last = _root;
     }
@@ -66,17 +74,20 @@ public class MyLinkedHashSet<T> implements Set<T> {
     @Override
     public boolean add(T data) {
         if (!contains(data)) {
-            int index = data.hashCode() % HASH_TABLE_SIZE;
+            int index = abs(data.hashCode()) % HASH_TABLE_SIZE;
             MySetNode<T> node = _hashTable.get(index);
 
             if (node == null) {
                 node = new MySetNode<T>(data);
+                _hashTable.set(index, node);
             } else {
                 while (node._nextInHashTable != null) {
                     node = node._nextInHashTable;
                 }
 
-                node._nextInHashTable = new MySetNode<T>(data);
+                MySetNode<T> nodeTmp = new MySetNode<T>(data);
+                node._nextInHashTable = nodeTmp;
+                node = nodeTmp;
             }
 
             _last._next = node;
@@ -105,11 +116,7 @@ public class MyLinkedHashSet<T> implements Set<T> {
             add(t);
         }
 
-        if (sizeOld == _size) {
-            return false;
-        } else {
-            return true;
-        }
+        return (sizeOld < _size) ? true : false;
     }
 
     /**
@@ -117,12 +124,13 @@ public class MyLinkedHashSet<T> implements Set<T> {
     */
     @Override
     public void clear() {
-        MySetNode<T> node = _root;
+        MySetNode<T> node = _root._next;
 
-        while (node._next != null) {
-            node = node._next;
-            remove(node);
-        }
+       for (T t : this) {
+           remove(t);
+       }
+        _root._next = null;
+        _last = _root;
     }
 
     /**
@@ -134,7 +142,7 @@ public class MyLinkedHashSet<T> implements Set<T> {
      */
     @Override
     public boolean contains(Object o) {
-        int index = o.hashCode() % HASH_TABLE_SIZE;
+        int index = abs(o.hashCode()) % HASH_TABLE_SIZE;
         MySetNode<T> node = _hashTable.get(index);
 
         if (node == null) {
@@ -195,7 +203,7 @@ public class MyLinkedHashSet<T> implements Set<T> {
     @Override
     public boolean remove(Object o) {
         if(contains(o)) {
-            int index = o.hashCode() % HASH_TABLE_SIZE;
+            int index = abs(o.hashCode()) % HASH_TABLE_SIZE;
             MySetNode<T> node = _hashTable.get(index);
             MySetNode<T> nodePrevInHashTable = null;
 
@@ -206,6 +214,9 @@ public class MyLinkedHashSet<T> implements Set<T> {
 
             if (node._prev != null) {
                 node._prev._next = node._next;
+                if(_last == node) {
+                    _last = node._prev;
+                }
             }  
             if (node._next != null) {
                 node._next._prev = node._prev;
@@ -245,6 +256,7 @@ public class MyLinkedHashSet<T> implements Set<T> {
 
     /**
      * Удаление всех элемнтов данной коллекции, которое не входят в заданную коллекцию
+     * Если вторая коллекция также множество ({@code Set}), то результат операции эквивалентен пересечению множеств
      * 
      * @param c - коллекция
      * @return {@code true}, если был удалён хотя бы один элемент; {@code false} в обратном случае
@@ -253,8 +265,10 @@ public class MyLinkedHashSet<T> implements Set<T> {
     public boolean retainAll(Collection<?> c) {
         int sizeOld = _size;
 
-        for (Object o : c) {
-            remove(o);
+        for (Object o : this) {
+            if (!c.contains(o)) {
+                remove(o);
+            }
         }
         return (sizeOld > _size) ? true : false;
     }
@@ -301,12 +315,14 @@ public class MyLinkedHashSet<T> implements Set<T> {
         }
         else {
             array = (U[]) new Object[_size];
-            int count = 0;
-            for (Object o : this) {
-                array[count] = (U) o;
-                count++;
-            }
         }
+
+        int count = 0;
+        for (Object o : this) {
+            array[count] = (U) o;
+            count++;
+        }
+
         return array;
     }
 
@@ -318,12 +334,12 @@ public class MyLinkedHashSet<T> implements Set<T> {
         private MySetNode<T> _node;
 
         public MySetIterator() {
-            _node = _root;
+            _node = _root._next;
         }
 
         @Override
         public boolean hasNext() {
-            return (_node._next != null) ? true : false;
+            return (_node != null) ? true : false;
         }
 
         @Override
