@@ -91,7 +91,7 @@ public class MyLinkedHashSet<T> implements Set<T> {
     }
 
     /**
-     * Добавление всех элементов коллекции
+     * Добавление всех элементов заданной коллекции в данную коллекцию
      * 
      * @param c - коллекция, элементы которой должны быть добавлены
      * @return {@code true}, если хотя бы отдин элемент был добавлен; {@code false}
@@ -153,7 +153,7 @@ public class MyLinkedHashSet<T> implements Set<T> {
     }
 
     /**
-     * Проверка на наличие всех элементов другой колеекции в коллекции
+     * Проверка на наличие всех элементов заданной колеекции в коллекции
      * 
      * @param c - коллекция
      * @return {@code true}, если все элементы коллекции {@code c} находятся в
@@ -183,8 +183,7 @@ public class MyLinkedHashSet<T> implements Set<T> {
 
     @Override
     public Iterator<T> iterator() {
-        // TODO Auto-generated method stub
-        return null;
+        return new MySetIterator();
     }
 
     /** 
@@ -228,7 +227,7 @@ public class MyLinkedHashSet<T> implements Set<T> {
     }
 
     /** 
-     * Удаление всех вхождений элементов другой коллекции, которые присутствуют в коллекции
+     * Удаление всех вхождений элементов заданной коллекции из данной коллекции
      * 
      * @param o - коллекция
      * @return {@code true}, если  хотя бы один элемент был удалён из коллекции; {@code false} в обратном случае
@@ -244,18 +243,34 @@ public class MyLinkedHashSet<T> implements Set<T> {
         return (sizeOld > _size) ? true : false;
     }
 
+    /**
+     * Удаление всех элемнтов данной коллекции, которое не входят в заданную коллекцию
+     * 
+     * @param c - коллекция
+     * @return {@code true}, если был удалён хотя бы один элемент; {@code false} в обратном случае
+     */
     @Override
     public boolean retainAll(Collection<?> c) {
-        // TODO Auto-generated method stub
-        return false;
+        int sizeOld = _size;
+
+        for (Object o : c) {
+            remove(o);
+        }
+        return (sizeOld > _size) ? true : false;
     }
 
+    /**
+     * Количество элементов в коллекции
+     * @return {@code int} размер коллекции
+     */
     @Override
     public int size() {
         return _size;
     }
 
-    /** Преобразование в массив
+    /** 
+     * Преобразование в массив
+     * 
      * @return массив {@code Object[]} из элементов коллекции в порядке их добавления 
      */
     @Override
