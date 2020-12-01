@@ -156,13 +156,20 @@ public class MyLinkedHashSet<T> implements Set<T> {
      * Проверка на наличие всех элементов другой колеекции в коллекции
      * 
      * @param c - коллекция
-     * @return {@code true}, если все элементы колссекции {@code c} находятся в
+     * @return {@code true}, если все элементы коллекции {@code c} находятся в
      *         коллекции; {@code false} в обратном случае
      */
     @Override
     public boolean containsAll(Collection<?> c) {
-        // TODO Auto-generated method stub
-        return false;
+        int count = 0;
+
+        for (Object o : c) {
+            if(contains(o)) {
+                count++;
+            }
+        }
+
+        return (count == c.size()) ? true : false;
     }
 
     /** Проверка на пустую коллекцию
@@ -180,6 +187,12 @@ public class MyLinkedHashSet<T> implements Set<T> {
         return null;
     }
 
+    /** 
+     * Удаление элемента из коллекции в случае, если он там присутствовал
+     * 
+     * @param o - элемент подлежащий удалению
+     * @return {@code true}, если элемент был удалён из коллекции; {@code false} в обратном случае
+     */
     @Override
     public boolean remove(Object o) {
         if(contains(o)) {
@@ -205,6 +218,7 @@ public class MyLinkedHashSet<T> implements Set<T> {
             else {
                 nodePrevInHashTable._nextInHashTable = (node == null) ? null : node._nextInHashTable;
             }
+            _size--;
 
             return true;
         }
@@ -213,10 +227,21 @@ public class MyLinkedHashSet<T> implements Set<T> {
         }
     }
 
+    /** 
+     * Удаление всех вхождений элементов другой коллекции, которые присутствуют в коллекции
+     * 
+     * @param o - коллекция
+     * @return {@code true}, если  хотя бы один элемент был удалён из коллекции; {@code false} в обратном случае
+     */
     @Override
     public boolean removeAll(Collection<?> c) {
-        // TODO Auto-generated method stub
-        return false;
+        int sizeOld = _size;
+
+        for (Object o : c) {
+            remove(o);
+        }
+
+        return (sizeOld > _size) ? true : false;
     }
 
     @Override
@@ -230,33 +255,71 @@ public class MyLinkedHashSet<T> implements Set<T> {
         return _size;
     }
 
+    /** Преобразование в массив
+     * @return массив {@code Object[]} из элементов коллекции в порядке их добавления 
+     */
     @Override
     public Object[] toArray() {
-        // TODO Auto-generated method stub
-        return null;
+        Object[] array = new Object[_size];
+        
+        int count = 0;
+        for (Object t : this) {
+            array[count] = t;
+            count++;
+        }
+
+        return array;
     }
 
+    /**
+     * Запись элементов коллекции в массив
+     * 
+     * @param U - параметр типа
+     * @return массив {@code U[]} из элементов коллекции в порядке их добавления 
+     */
     @Override
-    public <V> V[] toArray(V[] a) {
-        // TODO Auto-generated method stub
-        return null;
+    public <U> U[] toArray(U[] a) {
+        U[] array;
+
+        if (a.length >= _size) {
+            array = a;
+        }
+        else {
+            array = (U[]) new Object[_size];
+            int count = 0;
+            for (Object o : this) {
+                array[count] = (U) o;
+                count++;
+            }
+        }
+        return array;
     }
 
     /**
      * Класс итератора <code>MyLinkedHashSet</code>
      */
-    public class MySetIterator implements Iterator<T> {
+    private class MySetIterator implements Iterator<T> {
+        /** Текущий узел */
+        private MySetNode<T> _node;
+
+        public MySetIterator() {
+            _node = _root;
+        }
 
         @Override
         public boolean hasNext() {
-            // TODO Auto-generated method stub
-            return false;
+            return (_node._next != null) ? true : false;
         }
 
         @Override
         public T next() {
-            // TODO Auto-generated method stub
-            return null;
+            T data = _node._data;
+
+            if (hasNext()) {
+                _node = _node._next;
+            }
+
+            return data;
         }
 
     } // MySetIterator
