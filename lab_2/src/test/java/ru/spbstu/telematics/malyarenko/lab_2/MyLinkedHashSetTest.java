@@ -9,16 +9,17 @@ import java.util.Vector;
 
 import org.junit.Test;
 
-/**
- * Unit test for simple App.
- */
 public class MyLinkedHashSetTest 
 {
     private MyLinkedHashSet<Integer> set;
     private MyLinkedHashSet<Integer> setFilled;
 	private Vector<Integer> vector;
     private ArrayList<Integer> list;
-    private Integer[] array = {1, 2, 3, 5, 7, 11, 13};
+    private Integer[] array = {
+        2, 3, 5, 7, 11, 13, 17, 19,
+        23, 29, 31, 37, 41, 43, 47, 
+        53, 59, 61, 67, 71, 73, 79, 
+        83, 89, 97, 101, 103, 107};
 	
 	@Before
 	public void setUp() {
@@ -74,12 +75,16 @@ public class MyLinkedHashSetTest
         vector.add(2);
         vector.add(5);
         vector.add(7);
-        vector.add(11);
+        vector.add(101);
+        vector.add(53);
+        vector.add(19);
 
         list.add(2);
         list.add(5);
         list.add(7);
-        list.add(11);
+        list.add(101);
+        list.add(37);
+        list.add(67);
 
         assertTrue(setFilled.containsAll(vector));
         assertTrue(setFilled.containsAll(list));
@@ -146,6 +151,4 @@ public class MyLinkedHashSetTest
 
         assertArrayEquals(array, arrayObj);
     } 
-
-
 }
