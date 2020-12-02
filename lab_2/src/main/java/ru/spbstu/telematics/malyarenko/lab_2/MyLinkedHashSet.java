@@ -22,7 +22,7 @@ public class MyLinkedHashSet<T> implements Set<T> {
     private MySetNode<T> _last;
 
     /** Размер коллекции */
-    private byte _size;
+    private int _size;
 
     /**
      * Класс узла <code>MyLinkedHashSet</code>
