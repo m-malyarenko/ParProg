@@ -161,7 +161,6 @@ public class MyLinkedHashSet<T> implements Set<T> {
     public boolean contains(Object o) {
         int index = abs(o.hashCode()) % HASH_TABLE_SIZE;
         MySetNode<T> node = _hashTable.get(index);
-        boolean status;
 
         if (node == null) {
             return false;
@@ -326,6 +325,7 @@ public class MyLinkedHashSet<T> implements Set<T> {
      * @return массив {@code U[]} из элементов коллекции в порядке их добавления 
      */
     @Override
+    @SuppressWarnings("unchecked")
     public <U> U[] toArray(U[] a) {
         U[] array;
 
