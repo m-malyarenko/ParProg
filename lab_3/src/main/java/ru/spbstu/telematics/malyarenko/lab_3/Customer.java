@@ -16,7 +16,11 @@ public class Customer
 
     public int pay() {
         Random rand = new Random();
-        int sum = 1000 + rand.nextInt(10) * 100;
+        int sum = (20 + rand.nextInt(10)) * _fuelType.getPrice();
         return sum;
+    }
+
+    public void pourFuel(Pump pump) {
+
     }
 }
