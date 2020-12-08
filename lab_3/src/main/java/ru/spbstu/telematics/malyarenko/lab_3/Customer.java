@@ -53,9 +53,5 @@ public class Customer {
         Random rand = new Random();
         int sum = (20 + rand.nextInt(10)) * _fuelType.getPrice();
         return sum;
-    }
-
-    public void pourFuel(FuelPump pump) {
-
-    }   
+    } 
 }

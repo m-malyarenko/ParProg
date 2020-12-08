@@ -3,10 +3,9 @@ package ru.spbstu.telematics.malyarenko.lab_3;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Semaphore;
 
-
 public class CustomerThread implements Runnable {
 
-    /** Класс покупателя */
+    /** Класс реализующий функции покупателя */
     private Customer customer;
 
     /** Счётный семафор, контроллирующий доступ к заправочным насосам */
@@ -15,6 +14,9 @@ public class CustomerThread implements Runnable {
     /** Блокирующая очередь, моделирующая очередь в кассу */
     private BlockingQueue<Order> _cashboxQueue;
 
+    /** Блокирующая очередь, моделирующая работу кассира */
+    private BlockingQueue<Semaphore> _cashierQueue;
+
     /** Семафор для моделирования процесса заправки */
     private Semaphore _pumpSemaphore;
 
@@ -22,14 +24,14 @@ public class CustomerThread implements Runnable {
      * Конструктор потока клиента
      * 
      * @param availablePumpSem - Счётный семафор, контроллирующий доступ к заправочным насосам
-     * @param queue            - Блокирующая очередь, моделирующая очередь в кассу
-     * @param pumpSem          - Семафор для моделирования процесса заправки
+     * @param cashboxQueue     - Блокирующая очередь, моделирующая очередь в кассу
+     * @param cashierQueue     - Блокирующая очередь, моделирующая работу кассира
      */
-    public CustomerThread(Semaphore availablePumpSem, BlockingQueue<Order> queue, Semaphore pumpSem) {
+    public CustomerThread(Semaphore availablePumpSem, BlockingQueue<Order> cashboxQueue, BlockingQueue<Semaphore> cashierQueue) {
         customer = new Customer(getCustomerName());
         _availablePumpSemaphore = availablePumpSem;
-        _cashboxQueue = queue;
-        _pumpSemaphore = pumpSem;
+        _cashboxQueue = cashboxQueue;
+        _cashierQueue = cashierQueue;
     }
 
     @Override
@@ -48,8 +50,15 @@ public class CustomerThread implements Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
+            // Клиент ожидает, когда топливный насос будет активирован кассиром
+            try {
+                _pumpSemaphore = _cashierQueue.take();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             
-            // Клиент, оплативший топливо, ожидает когда можно будет заправить машину
+            // Клиент, оплативший топливо, ожидает когда машина будет заправлена
             try {
                 _pumpSemaphore.acquire();
             } catch (InterruptedException e) {

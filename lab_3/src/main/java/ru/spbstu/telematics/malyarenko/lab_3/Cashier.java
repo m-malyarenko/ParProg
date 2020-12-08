@@ -1,9 +1,6 @@
 package ru.spbstu.telematics.malyarenko.lab_3;
 
-import java.util.Stack;
-
 public class Cashier {
-    Stack<FuelPump> fuelPumpStack = new Stack<>();
 
     public FuelPump serveCustomer(FuelType fuelType, int sum) {
         // TODO complete method

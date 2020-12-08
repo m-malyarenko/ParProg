@@ -1,20 +1,16 @@
 package ru.spbstu.telematics.malyarenko.lab_3;
 
 public class FuelPump {
-    private int _fuelVolume;
     private FuelType _fuelType;
-    
-    public FuelPump() {
-        _fuelVolume = 0;
-        _fuelType = null;
-    }
+    private int _sum;
 
     public void newOrder(FuelType fuelType, int sum) {
         _fuelType = fuelType;
-        _fuelVolume = sum / _fuelType.getPrice();
+        _sum = sum;
     }
     
     public int giveFuel() {
-        return _fuelVolume;
+        int fuelVolume = _sum / _fuelType.getPrice();
+        return fuelVolume;
     }
 }
