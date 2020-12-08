@@ -7,13 +7,26 @@ public class Customer {
     private String _name;
 
     public Customer(String name) {
-        _fuelType = null;
-        _name = "Customer" + name;
+        _name = name;
+
+        switch (new Random().nextInt(3)) {
+            case 0:
+                setFuelType(FuelType.FUEL_92);
+                break;
+            case 1:
+                setFuelType(FuelType.FUEL_95);
+                break;
+            case 2:
+                setFuelType(FuelType.FUEL_DIESEL);
+                break;
+            default:
+                break;
+        }
     }
 
     public Customer(FuelType type, String name) {
         _fuelType = type;
-        _name = "Customer" + name;
+        _name = name;
     }
 
     public FuelType getFuelType() {
@@ -30,6 +43,10 @@ public class Customer {
 
     public void setName(String name) {
         _name = name;
+    }
+
+    public Order makeNewOrder() {
+        return new Order(_fuelType, pay());
     }
 
     public int pay() {
