@@ -2,16 +2,34 @@ package ru.spbstu.telematics.malyarenko.lab_3;
 
 import java.util.Random;
 
-public class Customer
-{
+public class Customer {
     private FuelType _fuelType;
+    private String _name;
 
-    public Customer(FuelType fuelType) {
-        _fuelType = fuelType;
+    public Customer(String name) {
+        _fuelType = null;
+        _name = "Customer" + name;
+    }
+
+    public Customer(FuelType type, String name) {
+        _fuelType = type;
+        _name = "Customer" + name;
     }
 
     public FuelType getFuelType() {
         return _fuelType;
+    }
+
+    public void setFuelType(FuelType type) {
+        _fuelType = type;
+    }
+
+    public String getName() {
+        return _name;
+    }
+
+    public void setName(String name) {
+        _name = name;
     }
 
     public int pay() {
@@ -20,7 +38,7 @@ public class Customer
         return sum;
     }
 
-    public void pourFuel(Pump pump) {
+    public void pourFuel(FuelPump pump) {
 
-    }
+    }   
 }
