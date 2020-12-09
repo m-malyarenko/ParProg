@@ -16,44 +16,67 @@ public class CashierThrerad implements Runnable {
     private BlockingQueue<Semaphore> _cashierQueue;
 
     /** Семафоры, моделирующие активацию топливных насосов */
-    private Queue<FuelPumpThread> _pumpThreads;
+    private Queue<FuelPumpThread> _fuelPumpThreads;
 
     /** Класс, моделирующая заказ */
     private Order _order;
 
-    public CashierThrerad(BlockingQueue<Order> queue, Queue<FuelPumpThread> threads) {
-        _cashboxQueue = queue;
-        _pumpThreads = threads;
+    public CashierThrerad(BlockingQueue<Order> cashboxQueue,
+        BlockingQueue<Semaphore> cashierQueue,
+        Queue<FuelPumpThread> threads) {
+
+        cashier = new Cashier();
+        _cashboxQueue = cashboxQueue;
+        _cashierQueue = cashierQueue;
+        _fuelPumpThreads = threads;
     }
     
     @Override
     public void run() {
+        while (!Thread.currentThread().isInterrupted()) {
 
-        // Кассир ожидает заказов от клиентов
-        try {
-            _order = _cashboxQueue.take();
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            _order = null;
-        }
+            // Кассир ожидает заказов от клиентов
+            try {
+                _order = _cashboxQueue.take();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                _order = null;
+            }
 
-        FuelPumpThread pumpThread =_pumpThreads.poll();
-        FuelPump pump = pumpThread.getFuelPump();
+            System.out.println("Cashier has received a new order: Fuel " 
+                + _order.getFuelType().getName() 
+                + "; Sum: " + _order.getSum());
 
-        // Кассир отправляет заказ на топливный насос
-        cashier.serveCustomer(pump, _order.getFuelType(), _order.getSum());
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
-        pumpThread.getPumpSemaphore().release();
-        _pumpThreads.add(pumpThread);
-        pumpThread.notify();
+            // Кассир отправляет заказ на топливный насос
+            System.out.println("Cashier has sent a new order to the fuel pump: Fuel " 
+                + _order.getFuelType().getName() 
+                + "; Sum: " + _order.getSum());
 
-        // Кассир говорит клиенту, когда топливо будет заправлено
-        try {
-            Thread.sleep(1000);
-            _cashierQueue.put(pumpThread.getPumpSemaphore());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            FuelPumpThread pumpThread =_fuelPumpThreads.poll();
+            FuelPump pump = pumpThread.getFuelPump();
+
+            cashier.serveCustomer(pump, _order.getFuelType(), _order.getSum());
+            pumpThread.getPumpSemaphore().release();
+            _fuelPumpThreads.add(pumpThread);
+
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            // Кассир говорит клиенту, когда топливо будет заправлено в автомобиль
+            try {
+                _cashierQueue.put(pumpThread.getPumpSemaphore());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

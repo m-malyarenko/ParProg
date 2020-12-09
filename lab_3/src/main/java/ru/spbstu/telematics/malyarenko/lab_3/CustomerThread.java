@@ -31,7 +31,7 @@ public class CustomerThread implements Runnable {
                           BlockingQueue<Order> cashboxQueue, 
                           BlockingQueue<Semaphore> cashierQueue)
     {
-        _customer = new Customer(getCustomerName());
+        _customer = new Customer();
         _availablePumpSemaphore = availablePumpSem;
         _cashboxQueue = cashboxQueue;
         _cashierQueue = cashierQueue;
@@ -39,7 +39,10 @@ public class CustomerThread implements Runnable {
 
     @Override
     public void run() {
+        _customer.setName(getCustomerName());
+
         while (!Thread.currentThread().isInterrupted()) {
+
             // Клиент ждёт, пока освободится заправочный насос
             try {
                 _availablePumpSemaphore.acquire();
@@ -48,15 +51,24 @@ public class CustomerThread implements Runnable {
             }
 
             System.out.println(_customer.getName() + " has taken over the fuel pump");
-            
-            // Клиент встаёт в очередь со своим заказом
+
+
             try {
-                _cashboxQueue.put(_customer.makeNewOrder());
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            
+            // Клиент встаёт в очередь со своим заказом
+            int sum = _customer.pay();
+            String fuelTypeName = _customer.getFuelType().getName();
+            System.out.println(_customer.getName() + " has paid for fuel: Fuel " + fuelTypeName + "; Sum " + sum);
 
-            System.out.println(_customer.getName() + " has paid for fuel: Fuel " + _customer.getFuelType().getName());
+            try {
+                _cashboxQueue.put(_customer.makeNewOrder(sum));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
             // Клиент, оплативший топливо, ожидает когда топливный насос будет активирован кассиром
             try {
@@ -75,19 +87,18 @@ public class CustomerThread implements Runnable {
             System.out.println(_customer.getName() + " has finished refueling the car");
             
             // Клиент освобождает топливный насос
-            _availablePumpSemaphore.release();
-
             try {
+                Thread.sleep(1000);
+                _availablePumpSemaphore.release();
+                System.out.println(_customer.getName() + " has vacated the fuel pump");
                 Thread.sleep(1000);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-            System.out.println(_customer.getName() + " has vacated the fuel pump");
         }
     }
 
-    private String getCustomerName() {
+    public String getCustomerName() {
         String name = "Customer" + Thread.currentThread().getName().substring(6);
         return name;
     }

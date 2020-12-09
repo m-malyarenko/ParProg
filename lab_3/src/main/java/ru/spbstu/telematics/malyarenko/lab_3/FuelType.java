@@ -10,6 +10,7 @@ public enum FuelType {
 
     FuelType(int price, String name) {
         _price = price;
+        _name = name;
     }
 
     public int getPrice() {

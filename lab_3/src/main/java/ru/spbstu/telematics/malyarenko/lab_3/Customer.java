@@ -6,9 +6,7 @@ public class Customer {
     private FuelType _fuelType;
     private String _name;
 
-    public Customer(String name) {
-        _name = name;
-
+    public Customer() {
         switch (new Random().nextInt(3)) {
             case 0:
                 setFuelType(FuelType.FUEL_92);
@@ -45,8 +43,8 @@ public class Customer {
         _name = name;
     }
 
-    public Order makeNewOrder() {
-        return new Order(_fuelType, pay());
+    public Order makeNewOrder(int sum) {
+        return new Order(_fuelType, sum);
     }
 
     public int pay() {

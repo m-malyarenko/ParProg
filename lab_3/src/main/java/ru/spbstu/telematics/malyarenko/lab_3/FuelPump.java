@@ -18,7 +18,7 @@ public class FuelPump {
 
         double errorProbability = random.nextDouble();
 
-        if(errorProbability < 0.05) {
+        if(errorProbability < 0.3) {
             fuelVolume -= random.nextInt(3); 
         }
 
@@ -29,5 +29,13 @@ public class FuelPump {
         int theoreticalVolume = _sum / _fuelType.getPrice();
 
         return theoreticalVolume == actualVolume ? true : false;
+    }
+
+    public FuelType getFuelType() {
+        return _fuelType;
+    }
+
+    public int getSum() {
+        return _sum;
     }
 }
