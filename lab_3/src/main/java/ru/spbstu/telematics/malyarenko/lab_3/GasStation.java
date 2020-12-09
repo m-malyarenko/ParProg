@@ -14,6 +14,7 @@ public class GasStation {
         Queue<FuelPumpThread> fuelPumpThreads = new LinkedList<>();
         Semaphore fuelPumpSemaphore[] = {new Semaphore(1), new Semaphore(1), new Semaphore(1)};
 
+        // Потоки топливных насосов
         for (int i = 0; i < 3; i++) {
             try {
                 fuelPumpSemaphore[i].acquire();
@@ -26,8 +27,10 @@ public class GasStation {
             new Thread(fuelPumpThread).start();
         }
 
+        // Поток кассира
         new Thread(new CashierThrerad(cashboxQueue, cashierQueue, fuelPumpThreads)).start();
 
+        // Потоки клиентов
         for (int i = 0; i < 10; i++) {
             new Thread(new CustomerThread(availablePumpSemaphore, cashboxQueue, cashierQueue)).start();
         }

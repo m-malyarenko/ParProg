@@ -4,7 +4,10 @@ import java.util.concurrent.Semaphore;
 
 public class FuelPumpThread implements Runnable {
 
+    /** Класс, моделирующий заправочный насос */
     private FuelPump _fuelPump;
+
+    /** Семафор, по которому заправочный насос сообщает о выполнении работы */
     private Semaphore _pumpSemaphore;
 
     public FuelPumpThread(Semaphore pumpSemaphore) {
@@ -27,7 +30,7 @@ public class FuelPumpThread implements Runnable {
 
             int fuelVolume;
 
-            // Проверка на правильность выполнения заказа
+            // Заправочный насос выполняет заказ и проверяет правильность выполнения заказа
             do {
                 fuelVolume = _fuelPump.giveFuel();
 
@@ -46,6 +49,7 @@ public class FuelPumpThread implements Runnable {
 
             } while (!_fuelPump.checkFuelVolume(fuelVolume));
 
+            // Запрвочный насос сообщает о том, что заправка окончена
             try {
                 _pumpSemaphore.release();
                 Thread.sleep(2000);
@@ -55,14 +59,17 @@ public class FuelPumpThread implements Runnable {
         }
     }
 
+    //** Вернуть объект класса заправочного насоса */
     public FuelPump getFuelPump() {
         return _fuelPump;
     }
 
+    /** Вернуть семафор, по которому заправочный насос сообщает о выполненной работе */
     public Semaphore getPumpSemaphore() {
         return _pumpSemaphore;
     }
 
+    /** Вернуть название заправочного насоса */
     private String getPumpName() {
         String name = "Pump" + Thread.currentThread().getName().substring(6);
         return name;

@@ -98,6 +98,11 @@ public class CustomerThread implements Runnable {
         }
     }
 
+    /**
+     * Получить имя клиента
+     * 
+     * @return String имя клиента
+     */
     public String getCustomerName() {
         String name = "Customer" + Thread.currentThread().getName().substring(6);
         return name;

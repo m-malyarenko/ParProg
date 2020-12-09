@@ -21,6 +21,13 @@ public class CashierThrerad implements Runnable {
     /** Класс, моделирующая заказ */
     private Order _order;
 
+    /**
+     * Конструктор потока кассира
+     * 
+     * @param cashboxQueue - блокирующая очередь, моделирующая очередь в кассу
+     * @param cashierQueue - блокирующая очередь, моделирующая работу кассира
+     * @param threads      - потоки заправочных насосов
+     */
     public CashierThrerad(BlockingQueue<Order> cashboxQueue,
         BlockingQueue<Semaphore> cashierQueue,
         Queue<FuelPumpThread> threads) {
@@ -61,7 +68,7 @@ public class CashierThrerad implements Runnable {
             FuelPumpThread pumpThread =_fuelPumpThreads.poll();
             FuelPump pump = pumpThread.getFuelPump();
 
-            cashier.serveCustomer(pump, _order.getFuelType(), _order.getSum());
+            cashier.serveCustomer(pump, _order);
             pumpThread.getPumpSemaphore().release();
             _fuelPumpThreads.add(pumpThread);
 
