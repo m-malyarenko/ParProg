@@ -48,7 +48,7 @@ public class FuelPumpThread implements Runnable {
 
             try {
                 _pumpSemaphore.release();
-                Thread.sleep(1000);
+                Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

@@ -56,7 +56,7 @@ public class CashierThrerad implements Runnable {
             // Кассир отправляет заказ на топливный насос
             System.out.println("Cashier has sent a new order to the fuel pump: Fuel " 
                 + _order.getFuelType().getName() 
-                + "; Sum: " + _order.getSum());
+                + "; Sum " + _order.getSum());
 
             FuelPumpThread pumpThread =_fuelPumpThreads.poll();
             FuelPump pump = pumpThread.getFuelPump();

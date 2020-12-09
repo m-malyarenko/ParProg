@@ -28,7 +28,7 @@ public class GasStation {
 
         new Thread(new CashierThrerad(cashboxQueue, cashierQueue, fuelPumpThreads)).start();
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             new Thread(new CustomerThread(availablePumpSemaphore, cashboxQueue, cashierQueue)).start();
         }
     }
