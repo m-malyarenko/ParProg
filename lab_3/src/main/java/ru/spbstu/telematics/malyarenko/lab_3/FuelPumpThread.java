@@ -26,6 +26,26 @@ public class FuelPumpThread implements Runnable {
                 e.printStackTrace();
             }
 
+            int fuelVolume;
+
+            do {
+                fuelVolume = _fuelPump.giveFuel();
+
+                if (_fuelPump.checkFuelVolume(fuelVolume)) {
+                    System.out.println(getPumpName() + " has poured CORRECT amount of fuel");
+                }
+                else {
+                    System.out.println(getPumpName() + " has poured INCORREC amount of fuel. Top up to correct amount.");
+                }
+
+            } while (!_fuelPump.checkFuelVolume(fuelVolume));
+
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
             _pumpSemaphore.release();
         }
     }
@@ -38,7 +58,8 @@ public class FuelPumpThread implements Runnable {
         return _pumpSemaphore;
     }
 
-    public void setPumpSemaphore(Semaphore pumpSemaphore) {
-        _pumpSemaphore = pumpSemaphore;
+    private String getPumpName() {
+        String name = "Pump" + Thread.currentThread().getName().substring(6);
+        return name;
     }
 }

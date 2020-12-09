@@ -6,7 +6,7 @@ import java.util.concurrent.Semaphore;
 public class CustomerThread implements Runnable {
 
     /** Класс реализующий функции покупателя */
-    private Customer customer;
+    private Customer _customer;
 
     /** Счётный семафор, контроллирующий доступ к заправочным насосам */
     private Semaphore _availablePumpSemaphore;
@@ -17,7 +17,7 @@ public class CustomerThread implements Runnable {
     /** Блокирующая очередь, моделирующая работу кассира */
     private BlockingQueue<Semaphore> _cashierQueue;
 
-    /** Семафор для моделирования процесса заправки */
+    /** Семафор, моделирующий процесс заправки */
     private Semaphore _pumpSemaphore;
 
     /**
@@ -27,8 +27,11 @@ public class CustomerThread implements Runnable {
      * @param cashboxQueue     - Блокирующая очередь, моделирующая очередь в кассу
      * @param cashierQueue     - Блокирующая очередь, моделирующая работу кассира
      */
-    public CustomerThread(Semaphore availablePumpSem, BlockingQueue<Order> cashboxQueue, BlockingQueue<Semaphore> cashierQueue) {
-        customer = new Customer(getCustomerName());
+    public CustomerThread(Semaphore availablePumpSem, 
+                          BlockingQueue<Order> cashboxQueue, 
+                          BlockingQueue<Semaphore> cashierQueue)
+    {
+        _customer = new Customer(getCustomerName());
         _availablePumpSemaphore = availablePumpSem;
         _cashboxQueue = cashboxQueue;
         _cashierQueue = cashierQueue;
@@ -43,15 +46,19 @@ public class CustomerThread implements Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
+            System.out.println(_customer.getName() + " has taken over the fuel pump");
             
             // Клиент встаёт в очередь со своим заказом
             try {
-                _cashboxQueue.put(customer.makeNewOrder());
+                _cashboxQueue.put(_customer.makeNewOrder());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
-            // Клиент ожидает, когда топливный насос будет активирован кассиром
+            System.out.println(_customer.getName() + " has paid for fuel: Fuel " + _customer.getFuelType().getName());
+
+            // Клиент, оплативший топливо, ожидает когда топливный насос будет активирован кассиром
             try {
                 _pumpSemaphore = _cashierQueue.take();
             } catch (InterruptedException e) {
@@ -65,11 +72,18 @@ public class CustomerThread implements Runnable {
                 e.printStackTrace();
             }
 
-            // Клиент закончил заправку
-            _pumpSemaphore.release();
+            System.out.println(_customer.getName() + " has finished refueling the car");
             
             // Клиент освобождает топливный насос
             _availablePumpSemaphore.release();
+
+            try {
+                Thread.sleep(1000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            System.out.println(_customer.getName() + " has vacated the fuel pump");
         }
     }
 

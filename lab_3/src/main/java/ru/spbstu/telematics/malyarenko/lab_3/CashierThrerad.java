@@ -18,6 +18,9 @@ public class CashierThrerad implements Runnable {
     /** Семафоры, моделирующие активацию топливных насосов */
     private Queue<FuelPumpThread> _pumpThreads;
 
+    /** Класс, моделирующая заказ */
+    private Order _order;
+
     public CashierThrerad(BlockingQueue<Order> queue, Queue<FuelPumpThread> threads) {
         _cashboxQueue = queue;
         _pumpThreads = threads;
@@ -27,34 +30,30 @@ public class CashierThrerad implements Runnable {
     public void run() {
 
         // Кассир ожидает заказов от клиентов
-        Order order;
-
         try {
-            order = _cashboxQueue.take();
+            _order = _cashboxQueue.take();
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
-            order = null;
+            _order = null;
         }
 
-        FuelPumpThread pump =_pumpThreads.poll();
-        pump.getFuelPump().newOrder(order.getFuelType(), order.getSum());
-        pump.getPumpSemaphore().release();
-        _pumpThreads.add(pump);
-        pump.notify();
+        FuelPumpThread pumpThread =_pumpThreads.poll();
+        FuelPump pump = pumpThread.getFuelPump();
 
+        // Кассир отправляет заказ на топливный насос
+        cashier.serveCustomer(pump, _order.getFuelType(), _order.getSum());
+
+        pumpThread.getPumpSemaphore().release();
+        _pumpThreads.add(pumpThread);
+        pumpThread.notify();
+
+        // Кассир говорит клиенту, когда топливо будет заправлено
         try {
-            _cashierQueue.put(pump.getPumpSemaphore());
+            Thread.sleep(1000);
+            _cashierQueue.put(pumpThread.getPumpSemaphore());
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        
-
-
-
-
-
-
-
     }
 }
