@@ -8,10 +8,20 @@ import java.util.LinkedList;
 
 public class GasStation {
     public static void main( String[] args ) {
+
+        /** Счётный семафор, контроллирующий доступ к заправочным насосам */
         Semaphore availablePumpSemaphore = new Semaphore(3, true);
+
+        /** Блокирующая очередь, моделирующая очередь в кассу */
         BlockingQueue<Order> cashboxQueue = new ArrayBlockingQueue<>(3, true);
+
+        /** Блокирующая очередь, моделирующая работу кассира */
         BlockingQueue<Semaphore> cashierQueue = new ArrayBlockingQueue<>(1, true);
+
+        /** Очередь потоков топливных насосов */
         Queue<FuelPumpThread> fuelPumpThreads = new LinkedList<>();
+
+        /** Семафоры, моделирующие процесс заправки */
         Semaphore fuelPumpSemaphore[] = {new Semaphore(1), new Semaphore(1), new Semaphore(1)};
 
         // Потоки топливных насосов

@@ -15,7 +15,7 @@ public class CashierThrerad implements Runnable {
     /** Блокирующая очередь, моделирующая работу кассира */
     private BlockingQueue<Semaphore> _cashierQueue;
 
-    /** Семафоры, моделирующие активацию топливных насосов */
+    /** Очередь потоков топливных насосов */
     private Queue<FuelPumpThread> _fuelPumpThreads;
 
     /** Класс, моделирующая заказ */
