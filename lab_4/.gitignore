@@ -1,0 +1,4 @@
+#Ignore settings folder
+
+/.settings/
+/target/

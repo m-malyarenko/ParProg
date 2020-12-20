@@ -1,4 +1,4 @@
-package ru.spbstu.telematics.malyarenko.lab_4;
+package ru.spbstu.telematics.mayerenko.lab_4;
 
 import static org.junit.Assert.assertTrue;
 
