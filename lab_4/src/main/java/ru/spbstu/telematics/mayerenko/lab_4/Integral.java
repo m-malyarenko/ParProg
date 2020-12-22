@@ -2,7 +2,7 @@ package ru.spbstu.telematics.mayerenko.lab_4;
 
 public class Integral {
 
-    /** Строковая интерпретация функции в прямой польской записи */
+    /** Строковое представление формулы в прямой польской записи */
     private String _func;
 
     /** Начало промежутка интегрирования */
