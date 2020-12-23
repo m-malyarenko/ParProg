@@ -37,7 +37,7 @@ public class Integral {
         _a = from;
         _b = to;
         _order = order;
-        _grain = frain;
+        _grain = grain;
     }
 
     /**
@@ -53,7 +53,7 @@ public class Integral {
      * @param from - начало промежутка интегрирования
      * @param to - конец промежутка интегрирования
      */
-    public void setInterval(doublr from, double to) {
+    public void setInterval(double from, double to) {
         _a = from;
         _b = to;
     }
