@@ -3,7 +3,7 @@ package ru.spbstu.telematics.mayerenko.lab_4;
 public class Integral {
 
     /** Строковое представление формулы в прямой польской записи */
-    private String _func;
+    private MathFunction _formula;
 
     /** Начало промежутка интегрирования */
     private double _a;
@@ -32,8 +32,8 @@ public class Integral {
      * @param order - порядок апроксимации [0 - 10]
      * @param grain - мелкость разбиения промежутка интегрирования {@code COARSE, MEDIUM, FINE}
      */
-    public Integral(String func, double from, double to, int order, Grain grain) {
-        _func = func;
+    public Integral(MathFunction formula, double from, double to, int order, Grain grain) {
+        _formula = formula;
         _a = from;
         _b = to;
         _order = order;
@@ -44,8 +44,8 @@ public class Integral {
      * Задать функцию
      * @param func - строковое представление функции в прямой польской записи
      */
-    public void setFunc(String func) {
-        _func = func;
+    public void setFormula(MathFunction formula) {
+        //_func = func;
     }
 
     /**

@@ -7,10 +7,11 @@ import java.util.Queue;
 import java.lang.Math;
 
 /**
- * Normal Polish Notation Parser
- * Парсер формулы в прямой польской записи со скобками
+ * Класс математической функции одной переменной
+ * С помощью него можно задавать функцию формулой в прямой польской записи
+ * и вычислять значение функции в заданной точке
  */
-public class Formula {
+public class MathFunction {
     
     /** Строковое представление формулы в прямой польской записи */
     private String _formula;
@@ -99,17 +100,52 @@ public class Formula {
     }
 
     /**
-     * Сконструировать класс парсера формул
+     * Сконструировать класс математической функции
      * Класс обрабатывает формулы в прямой польской нотации вида: a + b <=> (+ a b)
      * Доступные операции: *, /, +, -, sqr, sqrt, pow, sin, cos, tan, cot, exp, log
      * Доступная константа: pi
      * @param formula - строковое представление формулы в прямой польской записи
      * @param variable - cимвол переменной функции, которую реализует формула
      */
-    public Formula(String formula, String variable) {
+    public MathFunction(String formula, String variable) {
 
         if (formula == null) {
             throw new NullPointerException("Formula is undefined");
+        }
+
+        _formula = formula;
+        _variable = variable;
+        _syntaxTree = new ArrayList<Operand>();
+        _syntaxTreePointer = 0;
+
+        int parenthesesStatus = checkParentheses(formula);
+
+        if (parenthesesStatus == 0) {
+            try {
+                parse(_formula);
+            }
+            catch (RuntimeException e) {
+                throw e;
+            }
+        } else if (parenthesesStatus == -1) {
+            throw new RuntimeException("Unclosed parentheses");
+        } else {
+            throw new RuntimeException("Extra closing parenthesis at " + parenthesesStatus);
+        }
+    }
+
+    /**
+     * Сконструировать пустой класс математической функции
+     */
+    public MathFunction() {
+        _formula = null;
+        _variable = null;
+    }
+
+    public void setFormula(String formula, String variable) throws RuntimeException {
+
+        if (formula == null || variable == null) {
+            throw new NullPointerException("Formula or variable is undefined");
         }
 
         _formula = formula;
@@ -138,8 +174,22 @@ public class Formula {
      * @param x - аргумент функции
      * @return значие функции в точке {@code x}
      */
-    public double f(double x) {
-        double result = calculate(x);
+    public double f(double x) throws RuntimeException{
+        if (_formula == null) {
+            throw new RuntimeException("Function is not set yet");
+        }
+
+        double result = 0.;
+        try {
+            result = calculate(x);
+        }
+        catch (RuntimeException e){
+            throw e;
+        }
+        finally {
+            _syntaxTreePointer = 0;
+        }
+
         _syntaxTreePointer = 0;
         return result;
     }
@@ -149,7 +199,7 @@ public class Formula {
      * @param x - аргумент функции
      * @return значение функции подформулы в точке x
      */
-    private double calculate(double x) {
+    private double calculate(double x) throws RuntimeException {
         Operand operation = _syntaxTree.get(_syntaxTreePointer++);
         OperandType operationType = operation.getType();
 
