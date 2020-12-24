@@ -5,7 +5,7 @@ import ru.spbstu.telematics.mayerenko.lab_4.Integral.*;
 public class App {
     public static void main(String[] args) {
 
-        String formula = "(* (sqr x) 2)";
+        String formula = "(/ (+ (sin x) 1) pi)";
         MathFunction func = new MathFunction();
 
         int parseStatus = func.setFormula(formula, "x");
@@ -14,10 +14,10 @@ public class App {
             return;
         }
 
-        Integral integral = new Integral(func, ApproxOrder.ORDER_1, Grain.MEDIUM);
+        Integral integral = new Integral(func, ApproxOrder.ORDER_5, Grain.FINE);
 
         try {
-            double result = integral.integrate(0., 6.);
+            double result = integral.integrate(0, 2 * Math.PI);
             System.out.println("Integral value = " + result);
         }
         catch (RuntimeException e) {

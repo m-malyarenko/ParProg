@@ -100,13 +100,13 @@ public class Integral {
         for (int i = 0; i < _grain; i++) {
             for (int j = 0; j <= _order; j++) {
                 try {
-                    integral += (double) _coeffs[_order][j] * _func.f(x);
-                    x += delta;
+                    integral += (double) _coeffs[_order][j] * _func.f(x + j * delta);
                 }
                 catch (RuntimeException e) {
                     throw e;
                 }
             }
+            x += step;
         }
 
         integral *= mainCoeff;
