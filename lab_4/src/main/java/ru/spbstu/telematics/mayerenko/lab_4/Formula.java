@@ -1,5 +1,6 @@
 package ru.spbstu.telematics.mayerenko.lab_4;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -18,7 +19,10 @@ public class Formula {
     private String _variable;
 
     /** Синтаксическое дерево формулы, представленное массивом*/
-    private Queue<Operand> _syntaxTree;
+    private ArrayList<Operand> _syntaxTree;
+
+    /** Индекс следующего на выполнение узла синтаксического дерева */
+    private int _syntaxTreePointer;
 
     /** Массив строковых представлений операций */
     private static String[] reservedNames = 
@@ -110,7 +114,8 @@ public class Formula {
 
         _formula = formula;
         _variable = variable;
-        _syntaxTree = new LinkedList<Operand>();
+        _syntaxTree = new ArrayList<Operand>();
+        _syntaxTreePointer = 0;
 
         int parenthesesStatus = checkParentheses(formula);
 
@@ -129,82 +134,95 @@ public class Formula {
     }
 
     /**
-     * Вычислить значение фуекции в точке x
+     * Вычислить значение функции в точке x
      * @param x - аргумент функции
      * @return значие функции в точке {@code x}
      */
     public double f(double x) {
-        Operand operation = _syntaxTree.poll();
-        OperandType type = operation.getType();
+        double result = calculate(x);
+        _syntaxTreePointer = 0;
+        return result;
+    }
+
+    /**
+     * Рекурсивно вычислить функцию подформулы в точке x
+     * @param x - аргумент функции
+     * @return значение функции подформулы в точке x
+     */
+    private double calculate(double x) {
+        Operand operation = _syntaxTree.get(_syntaxTreePointer++);
+        OperandType operationType = operation.getType();
+
         int operandsCount = (int) operation.getValue();
-        double[] operandValues = new double[operandsCount];
+        double[] operandsValues = new double[operandsCount];
 
         for (int i = 0; i < operandsCount; i++) {
-            Operand nextOperand = _syntaxTree.peek();
+            Operand     nextOperand = _syntaxTree.get(_syntaxTreePointer);
             OperandType nextOperandType = nextOperand.getType();
+
             if (nextOperandType == OperandType.CONST) {
-                operandValues[i] = nextOperand.getValue();
-                _syntaxTree.poll();
+                operandsValues[i] = nextOperand.getValue();
+                _syntaxTreePointer++;
             } else if (nextOperandType == OperandType.VAR) {
-                operandValues[i] = x;
-                _syntaxTree.poll();
+                operandsValues[i] = x;
+                _syntaxTreePointer++;
             }
             else {
-                operandValues[i] = f(x);
+                operandsValues[i] = calculate(x);
             } 
         }
-
-        double result = 0.D;
-        switch (type) {
+        
+        double result = 0.;
+        switch (operationType) {
             case MUL:
                 result = 1;
-                for (double d : operandValues) result *= d;
+                for (double d : operandsValues) result *= d;
                 break;
             case DIV:
-                if (Double.compare(operandValues[1], 0.D) == 0) {
-                    throw new ArithmeticException("Division by zero");
+                if (Double.compare(operandsValues[1], 0.D) == 0) {
+                    throw new RuntimeException("Division by zero");
                 } 
-                result = operandValues[0] / operandValues[1];
+                result = operandsValues[0] / operandsValues[1];
                 break;
             case SUM:
                 result = 0;
-                for (double d : operandValues) result += d;
+                for (double d : operandsValues) result += d;
                 break;
             case SUB:
-                result = operandValues[0] - operandValues[1];
+                result = operandsValues[0] - operandsValues[1];
                 break;
             case SQR:
-                result = Math.pow(operandValues[0], 2.D);
+                result = Math.pow(operandsValues[0], 2.D);
                 break;
             case SQRT:
-                if (Double.compare(operandValues[0], 0.D) < 0) {
-                    throw new ArithmeticException("Square root of a negative value");
+                if (Double.compare(operandsValues[0], 0.D) < 0) {
+                    throw new RuntimeException("Square root of a negative value");
                 }
-                result = Math.sqrt(operandValues[0]);
+                result = Math.sqrt(operandsValues[0]);
                 break;
             case POW:
-                result = Math.pow(operandValues[0], operandValues[1]);
+                result = Math.pow(operandsValues[0], operandsValues[1]);
                 break;
             case SIN:
-                result = Math.sin(operandValues[0]);
+                result = Math.sin(operandsValues[0]);
                 break;
             case COS:
-                result = Math.cos(operandValues[0]);
+                result = Math.cos(operandsValues[0]);
                 break;
             case TAN:
-                result = Math.tan(operandValues[0]);
+                result = Math.tan(operandsValues[0]);
                 break;
             case COT:
-                result = 1 / Math.tan(operandValues[0]);
+                result = 1 / Math.tan(operandsValues[0]);
                 break;
             case EXP:
-                result = Math.exp(operandValues[0]);
+                result = Math.exp(operandsValues[0]);
                 break;
             case LOG:
-                if (Double.compare(operandValues[0], 0.D) < 0) {
-                    throw new ArithmeticException("Logarithm of a negative value");
+                if (Double.compare(operandsValues[0], 0.D) < 0) {
+                    throw new RuntimeException("Logarithm of a negative value");
                 }
-                result = Math.log(operandValues[0]);
+                result = Math.log(operandsValues[0]);
                 break;
             default:
                 break;
@@ -258,7 +276,7 @@ public class Formula {
      * @param formula - строковое представление формулы в прямой польской записи <br>
      * 
      * 1) Пример: (* pi (sqr x)) <=> pi*x^2<br>
-     * 2) Пример: (+ (/ (* 2.3 x) (log x)) (sin x) 8) <=> 2.3 * x / log(x) + (sin(x) + 8
+     * 2) Пример: (+ (/ (* 2.3 x) (log x)) (sin x) 8) <=> 2.3 * x / log(x) + sin(x) + 8
      */
     private void parse(String formula) {
         formula = formula.substring(1, formula.length() - 1); // Убрать внешние скобки
@@ -293,6 +311,10 @@ public class Formula {
 
         // Выделить и сохранить в очереди операнды-подформулы
         for (int i = 0; i < formulaCharArray.length; i++) {
+            if (formulaCharArray[i] == '#') {
+                throw new RuntimeException("Undefined symbol");
+            }
+
             if (formulaCharArray[i] == '(') {
                 StringBuilder subformula = new StringBuilder();
                 subformula.append(formulaCharArray[i]);
@@ -307,7 +329,9 @@ public class Formula {
                             break;
                         case ')':
                             parenthesesCount--;
-                            break;            
+                            break;
+                        case '#':
+                            throw new RuntimeException("Undefined symbol");
                         default:
                             break;
                     }
