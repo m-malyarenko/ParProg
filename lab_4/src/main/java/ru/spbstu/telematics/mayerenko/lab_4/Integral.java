@@ -1,7 +1,6 @@
 package ru.spbstu.telematics.mayerenko.lab_4;
 
-import java.lang.Math;
-
+/** Класс, реализующий численное интегрирование */
 public class Integral {
 
     /** Строковое представление формулы в прямой польской записи */

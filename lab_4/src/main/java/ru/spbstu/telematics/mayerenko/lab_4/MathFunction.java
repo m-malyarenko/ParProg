@@ -163,12 +163,11 @@ public class MathFunction {
      * Задать новую формулу математической функции
      * @param formula - строковое представление функции в прямой польской записи
      * @param variable - название переменной
-     * @return {@code 0} в случае удачного завершения, {@code<0} в обратном случае
      */
-    public int setFormula(String formula, String variable) {
+    public void setFormula(String formula, String variable) throws RuntimeException {
 
         if (formula == null || variable == null) {
-            return -1;
+            throw new RuntimeException("Formula or variable are undefined");
         }
 
         _formula = formula;
@@ -183,16 +182,12 @@ public class MathFunction {
                 parse(_formula);
             }
             catch (RuntimeException e) {
-                System.err.println("Failed to parse the formula: " + e.getMessage());
-                return -1;
+                throw e;
             }
-            return 0;
         } else if (parenthesesStatus == -1) {
-            System.err.print("Failed to parse the formula: Unclosed parentheses");
-            return -1;
+            throw new RuntimeException("Unclosed parentheses");
         } else {
-            System.err.print("Failed to parse the formula: Extra closing parenthesis at " + parenthesesStatus);
-            return -1;
+            throw new RuntimeException("Extra closing parenthesis at " + parenthesesStatus);
         }
     }
 
@@ -443,7 +438,6 @@ public class MathFunction {
             if (!s.matches("#+")) { // Разбор простого операнда
                 if (s.equals(_variable)) {
                     operandType = OperandType.VAR;
-                    operandValue = 0.;
                 } else if (s.equals(reservedNames[13])) {
                     operandType = OperandType.CONST;
                     operandValue = Math.PI;

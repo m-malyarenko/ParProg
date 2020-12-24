@@ -1,18 +1,32 @@
 package ru.spbstu.telematics.mayerenko.lab_4;
 
-import ru.spbstu.telematics.mayerenko.lab_4.Integral.*;
+import java.util.Scanner;
+
+import ru.spbstu.telematics.mayerenko.lab_4.Integral.ApproxOrder;
+import ru.spbstu.telematics.mayerenko.lab_4.Integral.Grain;
 
 public class App {
     public static void main(String[] args) {
 
-        String formula = "(/ (+ (sin x) 1) pi)";
+        String formula;
         MathFunction func = new MathFunction();
+        Scanner in = new Scanner(System.in);
 
-        int parseStatus = func.setFormula(formula, "x");
+        for (;;) {
+            System.out.print("Enter the formula: ");
+            formula = in.nextLine();
 
-        if (parseStatus < 0) {
-            return;
+            try {
+                func.setFormula(formula, "x");
+            }
+            catch (RuntimeException e) {
+                System.out.println("Failed to parse the formula: " + e.getMessage());
+                continue;
+            }
+            break;
         }
+
+        in.close();
 
         Integral integral = new Integral(func, ApproxOrder.ORDER_5, Grain.FINE);
 
