@@ -140,12 +140,35 @@ public class MathFunction {
     public MathFunction() {
         _formula = null;
         _variable = null;
+        _syntaxTree = null;
+        _syntaxTreePointer = 0;
     }
 
-    public void setFormula(String formula, String variable) throws RuntimeException {
+    /**
+     * Сконструировать копию класса математической функции
+     * @param other - экземляр математической функции
+     */
+    public MathFunction(MathFunction other) {
+        if (other == null) {
+            throw new NullPointerException();
+        }
+
+        _formula = new String(other._formula);
+        _variable = new String(other._variable);
+        _syntaxTree = new ArrayList<Operand>(other._syntaxTree);
+        _syntaxTreePointer = 0;
+    }
+
+    /**
+     * Задать новую формулу математической функции
+     * @param formula - строковое представление функции в прямой польской записи
+     * @param variable - название переменной
+     * @return {@code 0} в случае удачного завершения, {@code<0} в обратном случае
+     */
+    public int setFormula(String formula, String variable) {
 
         if (formula == null || variable == null) {
-            throw new NullPointerException("Formula or variable is undefined");
+            return -1;
         }
 
         _formula = formula;
@@ -160,12 +183,16 @@ public class MathFunction {
                 parse(_formula);
             }
             catch (RuntimeException e) {
-                throw e;
+                System.err.println("Failed to parse the formula: " + e.getMessage());
+                return -1;
             }
+            return 0;
         } else if (parenthesesStatus == -1) {
-            throw new RuntimeException("Unclosed parentheses");
+            System.err.print("Failed to parse the formula: Unclosed parentheses");
+            return -1;
         } else {
-            throw new RuntimeException("Extra closing parenthesis at " + parenthesesStatus);
+            System.err.print("Failed to parse the formula: Extra closing parenthesis at " + parenthesesStatus);
+            return -1;
         }
     }
 

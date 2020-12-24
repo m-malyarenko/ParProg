@@ -1,22 +1,29 @@
 package ru.spbstu.telematics.mayerenko.lab_4;
 
+import ru.spbstu.telematics.mayerenko.lab_4.Integral.*;
+
 public class App {
     public static void main(String[] args) {
 
-        String formulaStr = "(+ (/ 1 (pow 2 x)) 12.2)";
-        double result = 0.;
+        String formula = "(* (sqr x) 2)";
+        MathFunction func = new MathFunction();
+
+        int parseStatus = func.setFormula(formula, "x");
+
+        if (parseStatus < 0) {
+            return;
+        }
+
+        Integral integral = new Integral(func, ApproxOrder.ORDER_1, Grain.MEDIUM);
 
         try {
-            MathFunction formula = new MathFunction(formulaStr, "x");
-            
-            for (int i = 0; i < 10; i++) {
-                result = formula.f((double) i);
-                System.out.println("Result i=" + i + ": = " + result);
-            }
+            double result = integral.integrate(0., 6.);
+            System.out.println("Integral value = " + result);
         }
         catch (RuntimeException e) {
-            System.out.print("Error occured: ");
-            System.out.println(e.getMessage());
+            System.err.println("Failed to integrate: " + e.getMessage());
         }
+
+
     }
 }
