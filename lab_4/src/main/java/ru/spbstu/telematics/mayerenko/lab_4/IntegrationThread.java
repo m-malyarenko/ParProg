@@ -1,12 +1,14 @@
 package ru.spbstu.telematics.mayerenko.lab_4;
 
-import ru.spbstu.telematics.mayerenko.lab_4.Integral.ApproxOrder;
-import ru.spbstu.telematics.mayerenko.lab_4.Integral.Grain;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.DoubleAdder;
+
+import ru.spbstu.telematics.mayerenko.lab_4.Integral.*;
 
 /** Класс, реализующий параллельное вычисление интеграла */
 public class IntegrationThread implements Runnable {
-    /** Подынтегральная функция */
-    private MathFunction _func;
+    /** Экземляр класса реализующий численное вычисление интеграла по промежутку */
+    private Integral _integral;
 
     /** Начало промежутка интегрирования */
     private double _a;
@@ -14,30 +16,75 @@ public class IntegrationThread implements Runnable {
     /** Конец промежутка интегрирования */
     private double _b;
 
-    /** Общее значение интеграла */
-    private Double _integralValue;
+    /** Атомарная операция суммирования общего значение интеграла*/
+    private DoubleAdder _integralValue;
 
-    /**
-     * Сконструировать класс потока интегрирования по заданному промежутку
-     * @param from - начало промежутка интегрирования
-     * @param to - конец промежутка интегрирования
+    /** Объект синхронизации для одновременного окончания вычислений
+     * интеграла по общему промежутку
      */
-    public IntegrationThread(MathFunction func, double from, double to, Double integralValue) {
-        _func = new MathFunction(func);
+    private CountDownLatch _latch;
+
+   /**
+    * Сконструировать класс потока интегрирования с заданными параметрами
+    * @param func - подынтегральная функция
+    * @param order - порядок аппроксимации
+    * @param grain - мелкость разбиения
+    * @param from - начало промежутка интегрирования
+    * @param to - конец промежутка интегрирования
+    * @param integralValue - ссылка на общее вычисляемое значение интеграла
+    */
+    public IntegrationThread(
+        MathFunction func,
+        ApproxOrder order,
+        Grain grain, 
+        double from, 
+        double to,
+        DoubleAdder integralValue,
+        CountDownLatch latch
+    ) {
+        _integral = new Integral(func, order, grain);
         _a = from;
         _b = to;
         _integralValue = integralValue;
+        _latch = latch;
+    }
+
+    /**
+     * Сконструировать класс потока интегрирования с заданными параметрами
+     * @param integral - класс численного интегрирования
+     * @param from - начало промежутка интегрирования
+     * @param to - конец промежутка интегрирования
+     * @param integralValue - ссылка на общее вычисляемое значение интеграла
+     */
+    public IntegrationThread(
+        Integral integral,
+        double from,
+        double to,
+        DoubleAdder integralValue,
+        CountDownLatch latch
+    ) {
+        _integral = new Integral(integral);
+        _a = from;
+        _b = to;
+        _integralValue = integralValue;
+        _latch = latch;
     }
 
     @Override
     public void run() {
-        Integral integral = new Integral(_func, ApproxOrder.ORDER_5, Grain.FINE);
+        try {
+            double localIntegralValue = _integral.integrate(_a, _b);
+            _integralValue.add(localIntegralValue);
+        }
+        catch (RuntimeException e) {
+            throw new RuntimeException("Failed to integrate function on [" + _a + ", " + _b + "]: " + e.getMessage());
+        }
 
-        double localIntegralValue = integral.integrate(_a, _b);
-
-        synchronized (this) {
-            _integralValue += localIntegralValue;
+        _latch.countDown();
+        try {
+            _latch.await();
+        } catch (InterruptedException e) {
+            System.err.println(e.getMessage());
         }
     }
-    
 }

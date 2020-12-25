@@ -11,12 +11,12 @@ public class Integral {
 
     /** Виды мелкости разбиения */
     public enum ApproxOrder {
-        ORDER_0(0),
-        ORDER_1(1),
-        ORDER_2(2),
-        ORDER_3(3),
-        ORDER_4(4),
-        ORDER_5(5);
+        ORDER_0 (0),
+        ORDER_1 (1),
+        ORDER_2 (2),
+        ORDER_3 (3),
+        ORDER_4 (4),
+        ORDER_5 (5);
         
         private int _order;
 
@@ -34,9 +34,9 @@ public class Integral {
 
     /** Виды мелкости разбиения с заданным порядком мелкости*/
     public enum Grain {
-        COARSE(100),
-        MEDIUM(1000),
-        FINE(10000);
+        COARSE (100),
+        MEDIUM (1000),
+        FINE   (10000);
 
         private int _grain;
 
@@ -71,9 +71,19 @@ public class Integral {
      * @param grain - мелкость разбиения промежутка интегрирования {@code COARSE, MEDIUM, FINE}
      */
     public Integral(MathFunction func, ApproxOrder order, Grain grain) {
-        _func = func;
+        _func = new MathFunction(func);
         _order = order.getOrder();
         _grain = grain.getGrain();
+    }
+
+    /**
+     * Сконструировать копию класса численного интегрирования
+     * @param other - экземляр, который необходимо скопировать
+     */
+    public Integral(Integral other) {
+        _func = new MathFunction(other._func);
+        _order = other._order;
+        _grain = other._grain;
     }
 
     /**
