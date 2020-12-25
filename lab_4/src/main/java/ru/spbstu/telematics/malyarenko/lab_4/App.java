@@ -2,6 +2,7 @@ package ru.spbstu.telematics.malyarenko.lab_4;
 
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.DoubleAdder;
 
 import org.apache.commons.cli.*;
@@ -58,7 +59,7 @@ public class App {
             from = Double.parseDouble(intervalLimits[0]);
             to = Double.parseDouble(intervalLimits[1]);
         } catch (NumberFormatException e) {
-            System.err.println(e.getMessage());
+            System.err.println("Invalid number format in the interval limits");
             System.exit(1);
         }
 
@@ -74,7 +75,7 @@ public class App {
         try {
             approxOrderIndex = Integer.parseInt(commandLine.getOptionValue("a", "2"));
         } catch (NumberFormatException e) {
-            System.err.println("Undefined approximation order");
+            System.err.println("Undefined approximation order parameter");
             helpList.printHelp("Available options", options);
             System.exit(1);
         }
@@ -96,7 +97,7 @@ public class App {
                 order = ApproxOrder.ORDER_4;
                 break;                                      
             default:
-                System.err.println("Undefined approximation order");
+                System.err.println("Undefined approximation order parameter");
                 helpList.printHelp("Available options", options);
                 System.exit(1);
                 break;
@@ -106,7 +107,7 @@ public class App {
         int grainIndex = 0;
         Grain grain = null;
         try {
-            grainIndex = Integer.parseInt(commandLine.getOptionValue("a", "1"));
+            grainIndex = Integer.parseInt(commandLine.getOptionValue("g", "1"));
         } catch (NumberFormatException e) {
             System.err.println("Undefined grain parameter");
             helpList.printHelp("Available options", options);
@@ -155,18 +156,31 @@ public class App {
             threads.add(new Thread(new IntegrationThread(integral, localFrom, localTo, integralValue, latch)));
         }
 
+        // Timer start
+        boolean awaitStatus = false;
+        long startTime = System.currentTimeMillis();
+
         for (Thread t : threads) {
             t.start();
         }
 
         try {
-            latch.await();
+            awaitStatus = latch.await(3, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             System.err.println(e.getMessage());
         }
 
+        // Timer stop
+        long finishTime = System.currentTimeMillis();
+
     // Вывод результата интегрирования ----------------------------------------
-        System.out.println("Integer value is: " + integralValue.sum());
-        System.exit(0);
+        if(awaitStatus) {
+            System.out.println("Integral value is: " + integralValue.sum());
+            System.out.println("Execution time millis: " + (finishTime - startTime));
+            System.exit(0);
+        } else {
+            System.err.println("Integration failed: timeout elapsed");
+            System.exit(1);
+        }
     }
 }

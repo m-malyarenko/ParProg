@@ -77,7 +77,8 @@ public class IntegrationThread implements Runnable {
             _integralValue.add(localIntegralValue);
         }
         catch (RuntimeException e) {
-            throw new RuntimeException("Failed to integrate function on [" + _a + ", " + _b + "]: " + e.getMessage());
+            System.err.println("Failed to integrate function on [" + _a + ", " + _b + "]: " + e.getMessage());
+            return;
         }
 
         _latch.countDown();
