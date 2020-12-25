@@ -1,9 +1,9 @@
-package ru.spbstu.telematics.mayerenko.lab_4;
+package ru.spbstu.telematics.malyarenko.lab_4;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.DoubleAdder;
 
-import ru.spbstu.telematics.mayerenko.lab_4.Integral.*;
+import ru.spbstu.telematics.malyarenko.lab_4.Integral.*;
 
 /** Класс, реализующий параллельное вычисление интеграла */
 public class IntegrationThread implements Runnable {

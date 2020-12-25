@@ -1,11 +1,11 @@
-package ru.spbstu.telematics.mayerenko.lab_4;
+package ru.spbstu.telematics.malyarenko.lab_4;
 
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.DoubleAdder;
 
 import org.apache.commons.cli.*;
-import ru.spbstu.telematics.mayerenko.lab_4.Integral.*;
+import ru.spbstu.telematics.malyarenko.lab_4.Integral.*;
 
 public class App {
     private static final int _threadsCount = 4;

@@ -1,4 +1,4 @@
-package ru.spbstu.telematics.mayerenko.lab_4;
+package ru.spbstu.telematics.malyarenko.lab_4;
 
 /** Класс, реализующий численное интегрирование */
 public class Integral {
@@ -9,7 +9,7 @@ public class Integral {
     /** Порядок апроксимации */
     private int _order;
 
-    /** Виды мелкости разбиения */
+    /** Доступные порядки аппроксимации */
     public enum ApproxOrder {
         ORDER_0 (0),
         ORDER_1 (1),

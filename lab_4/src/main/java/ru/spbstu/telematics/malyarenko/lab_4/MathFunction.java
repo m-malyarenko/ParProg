@@ -1,4 +1,4 @@
-package ru.spbstu.telematics.mayerenko.lab_4;
+package ru.spbstu.telematics.malyarenko.lab_4;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -424,7 +424,7 @@ public class MathFunction {
         formula = new String(formulaCharArray);
 
         // Разбить формулу на операнды и подсчитать и проверить их количество
-        String[] operandList = formula.split("\s+");
+        String[] operandList = formula.split("\\s+");
         if (checkOperandNumber(operandType, operandList.length)) {
             operandValue = (double) operandList.length;
         } else {
