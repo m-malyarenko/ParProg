@@ -185,10 +185,20 @@ public class MathFunction {
                 throw e;
             }
         } else if (parenthesesStatus == -1) {
+            _formula = _variable = null;
             throw new RuntimeException("Unclosed parentheses");
         } else {
+            _formula = _variable = null;
             throw new RuntimeException("Extra closing parenthesis at " + parenthesesStatus);
         }
+    }
+
+    /**
+     * Проверка на то, задана ли формула
+     * @return {@code true}, если задана, {@code false} в обратном случае
+     */
+    public boolean isFormulaSet() {
+        return !(_formula == null);
     }
 
     /**

@@ -82,10 +82,5 @@ public class IntegrationThread implements Runnable {
         }
 
         _latch.countDown();
-        try {
-            _latch.await();
-        } catch (InterruptedException e) {
-            System.err.println(e.getMessage());
-        }
     }
 }

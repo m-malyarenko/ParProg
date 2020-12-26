@@ -152,7 +152,7 @@ public class App {
         ArrayList<Thread> threads = new ArrayList<>(_threadsCount);
         for (int i = 0; i < _threadsCount; i++) {
             double localFrom = from + subIntervalStep * i;
-            double localTo = localFrom + subIntervalStep - Double.MIN_VALUE;
+            double localTo = localFrom + subIntervalStep;
             threads.add(new Thread(new IntegrationThread(integral, localFrom, localTo, integralValue, latch)));
         }
 

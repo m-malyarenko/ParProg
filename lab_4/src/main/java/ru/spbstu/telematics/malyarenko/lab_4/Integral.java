@@ -34,9 +34,9 @@ public class Integral {
 
     /** Виды мелкости разбиения с заданным порядком мелкости*/
     public enum Grain {
-        COARSE (100),
-        MEDIUM (1000),
-        FINE   (10000);
+        COARSE (1000),
+        MEDIUM (10000),
+        FINE   (100000);
 
         private int _grain;
 
@@ -50,7 +50,7 @@ public class Integral {
     }
 
     /** Весовые коэффициенты */
-    private static final int[][] _coeffs = {
+    private static final double[][] _coeffs = {
         {1},                      // ORDER_0
         {1, 1},                   // ORDER_1
         {1, 4, 1},                // ORDER_2
@@ -60,7 +60,7 @@ public class Integral {
     };
 
     /** Суммы весовых коэффициентов */
-    private static final int[] _coeffsSum = {1, 2, 6, 8, 90, 288};
+    private static final double[] _coeffsSum = {1, 2, 6, 8, 90, 288};
 
     /**
      * Сконструировать класс численного интегрирования методами Ньютона-Котеса
@@ -109,7 +109,7 @@ public class Integral {
         for (int i = 0; i < _grain; i++) {
             for (int j = 0; j <= _order; j++) {
                 try {
-                    integral += (double) _coeffs[_order][j] * _func.f(x + j * delta);
+                    integral += _coeffs[_order][j] * _func.f(x + j * delta);
                 }
                 catch (RuntimeException e) {
                     throw e;
