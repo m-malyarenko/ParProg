@@ -19,10 +19,11 @@ public class IntegrationThread implements Runnable {
     /** Атомарная операция суммирования общего значение интеграла*/
     private DoubleAdder _integralValue;
 
-    /** Объект синхронизации для одновременного окончания вычислений
-     * интеграла по общему промежутку
-     */
-    private CountDownLatch _latch;
+    /** Синхронизация начала вычислений */
+    private CountDownLatch _startLatch;
+
+    /** Объект синхронизации для одновременного окончания вычислений интеграла по общему промежутку */
+    private CountDownLatch _finishLatch;
 
    /**
     * Сконструировать класс потока интегрирования с заданными параметрами
@@ -32,6 +33,8 @@ public class IntegrationThread implements Runnable {
     * @param from - начало промежутка интегрирования
     * @param to - конец промежутка интегрирования
     * @param integralValue - ссылка на общее вычисляемое значение интеграла
+    * @param startLatch - синхронизация начала вычислений
+    * @param finishLatch - синхронизация окончания вычислений
     */
     public IntegrationThread(
         MathFunction func,
@@ -40,13 +43,15 @@ public class IntegrationThread implements Runnable {
         double from, 
         double to,
         DoubleAdder integralValue,
-        CountDownLatch latch
+        CountDownLatch startLatch,
+        CountDownLatch finishLatch
     ) {
         _integral = new Integral(func, order, grain);
         _a = from;
         _b = to;
         _integralValue = integralValue;
-        _latch = latch;
+        _startLatch = startLatch;
+        _finishLatch = finishLatch;
     }
 
     /**
@@ -55,32 +60,42 @@ public class IntegrationThread implements Runnable {
      * @param from - начало промежутка интегрирования
      * @param to - конец промежутка интегрирования
      * @param integralValue - ссылка на общее вычисляемое значение интеграла
+     * @param startLatch - синхронизация начала вычислений
+     * @param finishLatch - синхронизация окончания вычислений
      */
     public IntegrationThread(
         Integral integral,
         double from,
         double to,
         DoubleAdder integralValue,
-        CountDownLatch latch
+        CountDownLatch startLatch,
+        CountDownLatch finishLatch
     ) {
         _integral = new Integral(integral);
         _a = from;
         _b = to;
         _integralValue = integralValue;
-        _latch = latch;
+        _startLatch = startLatch;
+        _finishLatch = finishLatch;
     }
 
     @Override
     public void run() {
         try {
+            _startLatch.countDown();
+            _startLatch.await();
+        } catch (InterruptedException e) {
+            System.err.println(e.getMessage());
+        }
+
+        try {
             double localIntegralValue = _integral.integrate(_a, _b);
             _integralValue.add(localIntegralValue);
+            _finishLatch.countDown();
         }
         catch (RuntimeException e) {
             System.err.println("Failed to integrate function on [" + _a + ", " + _b + "]: " + e.getMessage());
             return;
         }
-
-        _latch.countDown();
     }
 }

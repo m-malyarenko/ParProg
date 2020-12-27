@@ -1,6 +1,5 @@
 package ru.spbstu.telematics.malyarenko.lab_4;
 
-import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.DoubleAdder;
@@ -9,10 +8,9 @@ import org.apache.commons.cli.*;
 import ru.spbstu.telematics.malyarenko.lab_4.Integral.*;
 
 public class App {
-    private static final int _threadsCount = 4;
     public static void main(String[] args) {
 
-    // Разбор аргументов функции main -----------------------------------------
+    // Разбор аргументов функции main
         Options options = new Options();
 
         // Строковое представление формулы
@@ -131,8 +129,23 @@ public class App {
                 break;
         }
 
-    // Вычисление интеграла ---------------------------------------------------
-        double subIntervalStep = (to - from) / (double) _threadsCount;
+    // Определения количества потоков
+        int threadsCount = 0;
+        int intervaLength = Math.round((float) (to - from));
+        int intervalOrder = 0;
+        while (intervaLength != 0) {
+            intervaLength /= 10;
+            intervalOrder++;
+        }
+
+        if (intervalOrder < 12) {
+            threadsCount = intervalOrder + 1;
+        } else {
+            threadsCount = 12;
+        }
+
+    // Вычисление интеграла
+        double subIntervalStep = (to - from) / (double) threadsCount;
 
         MathFunction func = new MathFunction();
         try {
@@ -147,36 +160,33 @@ public class App {
         DoubleAdder integralValue = new DoubleAdder();
         integralValue.reset();
 
-        CountDownLatch latch = new CountDownLatch(_threadsCount);
+        CountDownLatch startLatch = new CountDownLatch(threadsCount);
+        CountDownLatch finisLatch = new CountDownLatch(threadsCount);
 
-        ArrayList<Thread> threads = new ArrayList<>(_threadsCount);
-        for (int i = 0; i < _threadsCount; i++) {
+        boolean awaitStatus = false;
+        for (int i = 0; i < threadsCount; i++) {
             double localFrom = from + subIntervalStep * i;
             double localTo = localFrom + subIntervalStep;
-            threads.add(new Thread(new IntegrationThread(integral, localFrom, localTo, integralValue, latch)));
-        }
-
-        // Timer start
-        boolean awaitStatus = false;
-        long startTime = System.currentTimeMillis();
-
-        for (Thread t : threads) {
-            t.start();
+            new Thread(new IntegrationThread(integral, localFrom, localTo, integralValue, startLatch, finisLatch)).start();;
         }
 
         try {
-            awaitStatus = latch.await(3, TimeUnit.SECONDS);
+            startLatch.await();
         } catch (InterruptedException e) {
             System.err.println(e.getMessage());
         }
 
-        // Timer stop
-        long finishTime = System.currentTimeMillis();
+        // Потоки интегрируют по подпромежутку
+
+        try {
+            awaitStatus = finisLatch.await(3, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            System.err.println(e.getMessage());
+        }
 
     // Вывод результата интегрирования ----------------------------------------
         if(awaitStatus) {
             System.out.println("Integral value is: " + integralValue.sum());
-            System.out.println("Execution time millis: " + (finishTime - startTime));
             System.exit(0);
         } else {
             System.err.println("Integration failed: timeout elapsed");

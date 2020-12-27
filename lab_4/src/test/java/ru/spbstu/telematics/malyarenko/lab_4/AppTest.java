@@ -2,7 +2,6 @@ package ru.spbstu.telematics.malyarenko.lab_4;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.DoubleAdder;
 
@@ -23,15 +22,16 @@ public class AppTest
     };
 
     // Макмиамльная погрешность вычисления интеграла
-    private static final double _epsilon = 11e-10;
+    private static final double _epsilon = 3e-10;
 
-    private static final int _threadsCount = 4;
+    private static final int _threadsCount = 6;
     private MathFunction[] _functions;
     private Integral _integral;
     private double _from;
     private double _to;
     private DoubleAdder _integralValue;
-    private CountDownLatch _latch;
+    private CountDownLatch _startLatch;
+    private CountDownLatch _finishLatch;
 
     @Before
     public void setUp() {
@@ -43,60 +43,80 @@ public class AppTest
         _integralValue = new DoubleAdder();
         _integralValue.reset();
 
-        _latch = new CountDownLatch(_threadsCount);
+        _startLatch = new CountDownLatch(_threadsCount);
+        _finishLatch = new CountDownLatch(_threadsCount);
     }
 
     @Test
     public void parseTest() {
-        String unclosedParentheses = "(* z (+ 2 (sin z)) (* (sin z) (cos z)))";
+        String unclosedParentheses = "(* z (+ 2 (sin z)) (* (sin z) (cos z))";
         String oddParentheses = "(+ 3 (exp 3) (tan z) (* -3 z)))";
-        String wrongOperationSymb = "(sin (& z 4)";
+        String wrongOperationSymb = "(sin (& z 4))";
         String wrongNumberFormat = "(+ 23.-e23 012 z)";
         String wrongOperandsNumber1 = "(exp z 34 67.567)";
         String wrongOperandsNumber2 = "(* 67)";
 
         MathFunction func = new MathFunction();
+        boolean errorCatchStatus = false;
 
         try {
             func.setFormula(unclosedParentheses, "z");
         } catch (RuntimeException e) {
             System.out.println(e.getMessage());
-            assertTrue(true);
+            errorCatchStatus = true;
+        } finally {
+            assertTrue(errorCatchStatus);
+            errorCatchStatus = false;
         }
 
         try {
             func.setFormula(oddParentheses, "z");
         } catch (RuntimeException e) {
             System.out.println(e.getMessage());
-            assertTrue(true);
+            errorCatchStatus = true;
+        } finally {
+            assertTrue(errorCatchStatus);
+            errorCatchStatus = false;
         }
 
         try {
             func.setFormula(wrongOperationSymb, "z");
         } catch (RuntimeException e) {
             System.out.println(e.getMessage());
-            assertTrue(true);
+            errorCatchStatus = true;
+        } finally {
+            assertTrue(errorCatchStatus);
+            errorCatchStatus = false;
         }
 
         try {
             func.setFormula(wrongNumberFormat, "z");
         } catch (RuntimeException e) {
             System.out.println(e.getMessage());
-            assertTrue(true);
+            errorCatchStatus = true;
+        } finally {
+            assertTrue(errorCatchStatus);
+            errorCatchStatus = false;
         }
 
         try {
             func.setFormula(wrongOperandsNumber1, "z");
         } catch (RuntimeException e) {
             System.out.println(e.getMessage());
-            assertTrue(true);
+            errorCatchStatus = true;
+        } finally {
+            assertTrue(errorCatchStatus);
+            errorCatchStatus = false;
         }
 
         try {
             func.setFormula(wrongOperandsNumber2, "z");
         } catch (RuntimeException e) {
             System.out.println(e.getMessage());
-            assertTrue(true);
+            errorCatchStatus = true;
+        } finally {
+            assertTrue(errorCatchStatus);
+            errorCatchStatus = false;
         }
     }
 
@@ -110,19 +130,20 @@ public class AppTest
         _integral = new Integral(_functions[0], ApproxOrder.ORDER_0, Grain.FINE);
         double subIntervalStep = (_to - _from) / (double) _threadsCount;
 
-        ArrayList<Thread> threads = new ArrayList<>(_threadsCount);
         for (int i = 0; i < _threadsCount; i++) {
             double localFrom = _from + subIntervalStep * i;
             double localTo = localFrom + subIntervalStep;
-            threads.add(new Thread(new IntegrationThread(_integral, localFrom, localTo, _integralValue, _latch)));
-        }
-
-        for (Thread t : threads) {
-            t.start();
+            new Thread(new IntegrationThread(_integral, localFrom, localTo, _integralValue, _startLatch, _finishLatch)).start();
         }
 
         try {
-            _latch.await();
+            _startLatch.await();
+        } catch (InterruptedException e) {
+            System.err.println(e.getMessage());
+        }
+
+        try {
+            _finishLatch.await();
         } catch (InterruptedException e) {
             System.err.println(e.getMessage());
         }
@@ -145,19 +166,20 @@ public class AppTest
         _integral = new Integral(_functions[1], ApproxOrder.ORDER_1, Grain.FINE);
         double subIntervalStep = (_to - _from) / (double) _threadsCount;
 
-        ArrayList<Thread> threads = new ArrayList<>(_threadsCount);
         for (int i = 0; i < _threadsCount; i++) {
             double localFrom = _from + subIntervalStep * i;
             double localTo = localFrom + subIntervalStep;
-            threads.add(new Thread(new IntegrationThread(_integral, localFrom, localTo, _integralValue, _latch)));
-        }
-
-        for (Thread t : threads) {
-            t.start();
+            new Thread(new IntegrationThread(_integral, localFrom, localTo, _integralValue, _startLatch, _finishLatch)).start();
         }
 
         try {
-            _latch.await();
+            _startLatch.await();
+        } catch (InterruptedException e) {
+            System.err.println(e.getMessage());
+        }
+
+        try {
+            _finishLatch.await();
         } catch (InterruptedException e) {
             System.err.println(e.getMessage());
         }
@@ -180,19 +202,20 @@ public class AppTest
         _integral = new Integral(_functions[2], ApproxOrder.ORDER_2, Grain.FINE);
         double subIntervalStep = (_to - _from) / (double) _threadsCount;
 
-        ArrayList<Thread> threads = new ArrayList<>(_threadsCount);
         for (int i = 0; i < _threadsCount; i++) {
             double localFrom = _from + subIntervalStep * i;
             double localTo = localFrom + subIntervalStep;
-            threads.add(new Thread(new IntegrationThread(_integral, localFrom, localTo, _integralValue, _latch)));
-        }
-
-        for (Thread t : threads) {
-            t.start();
+            new Thread(new IntegrationThread(_integral, localFrom, localTo, _integralValue, _startLatch, _finishLatch)).start();
         }
 
         try {
-            _latch.await();
+            _startLatch.await();
+        } catch (InterruptedException e) {
+            System.err.println(e.getMessage());
+        }
+
+        try {
+            _finishLatch.await();
         } catch (InterruptedException e) {
             System.err.println(e.getMessage());
         }
@@ -215,19 +238,20 @@ public class AppTest
         _integral = new Integral(_functions[3], ApproxOrder.ORDER_3, Grain.FINE);
         double subIntervalStep = (_to - _from) / (double) _threadsCount;
 
-        ArrayList<Thread> threads = new ArrayList<>(_threadsCount);
         for (int i = 0; i < _threadsCount; i++) {
             double localFrom = _from + subIntervalStep * i;
             double localTo = localFrom + subIntervalStep;
-            threads.add(new Thread(new IntegrationThread(_integral, localFrom, localTo, _integralValue, _latch)));
-        }
-
-        for (Thread t : threads) {
-            t.start();
+            new Thread(new IntegrationThread(_integral, localFrom, localTo, _integralValue, _startLatch, _finishLatch)).start();
         }
 
         try {
-            _latch.await();
+            _startLatch.await();
+        } catch (InterruptedException e) {
+            System.err.println(e.getMessage());
+        }
+
+        try {
+            _finishLatch.await();
         } catch (InterruptedException e) {
             System.err.println(e.getMessage());
         }
@@ -250,19 +274,20 @@ public class AppTest
         _integral = new Integral(_functions[4], ApproxOrder.ORDER_4, Grain.FINE);
         double subIntervalStep = (_to - _from) / (double) _threadsCount;
 
-        ArrayList<Thread> threads = new ArrayList<>(_threadsCount);
         for (int i = 0; i < _threadsCount; i++) {
             double localFrom = _from + subIntervalStep * i;
             double localTo = localFrom + subIntervalStep;
-            threads.add(new Thread(new IntegrationThread(_integral, localFrom, localTo, _integralValue, _latch)));
-        }
-
-        for (Thread t : threads) {
-            t.start();
+            new Thread(new IntegrationThread(_integral, localFrom, localTo, _integralValue, _startLatch, _finishLatch)).start();
         }
 
         try {
-            _latch.await();
+            _startLatch.await();
+        } catch (InterruptedException e) {
+            System.err.println(e.getMessage());
+        }
+
+        try {
+            _finishLatch.await();
         } catch (InterruptedException e) {
             System.err.println(e.getMessage());
         }
