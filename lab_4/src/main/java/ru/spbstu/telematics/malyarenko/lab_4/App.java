@@ -10,7 +10,7 @@ import ru.spbstu.telematics.malyarenko.lab_4.Integral.*;
 public class App {
     public static void main(String[] args) {
 
-    // Разбор аргументов функции main
+    // Разбор аргументов функции main ------------------------------------------
         Options options = new Options();
 
         // Строковое представление формулы
@@ -129,7 +129,7 @@ public class App {
                 break;
         }
 
-    // Определения количества потоков
+    // Определения количества потоков ------------------------------------------
         int threadsCount = 0;
         int intervaLength = Math.round((float) (to - from));
         int intervalOrder = 0;
@@ -144,7 +144,7 @@ public class App {
             threadsCount = 12;
         }
 
-    // Вычисление интеграла
+    // Вычисление интеграла ----------------------------------------------------
         double subIntervalStep = (to - from) / (double) threadsCount;
 
         MathFunction func = new MathFunction();
