@@ -23,7 +23,7 @@ public class App {
         interval.setArgs(2);
         options.addOption(interval);
         // Порядок аппроксимации
-        options.addOption("a", "approx", true, "order of the approximation: [0 - 4]");
+        options.addOption("a", "approx", true, "order of the approximation: [0 - 5]");
         // Мелкость разбиения промежутка интегрирования
         options.addOption("g", "grain", true, "fineness of splitting of the integration interval: 0 - coarse, 1 - medium, 2 - fine");
 
@@ -93,7 +93,10 @@ public class App {
                 break; 
             case 4:
                 order = ApproxOrder.ORDER_4;
-                break;                                      
+                break;
+            case 5:
+                order = ApproxOrder.ORDER_5;
+                break;                                         
             default:
                 System.err.println("Undefined approximation order parameter");
                 helpList.printHelp("Available options", options);

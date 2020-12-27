@@ -13,16 +13,17 @@ import ru.spbstu.telematics.malyarenko.lab_4.Integral.Grain;
 
 public class AppTest 
 {
-    private static String[] _formulas = {
-        "(* 2 pi)",                                             // Полином 0-й степени
-        "(+ (* 0.24 x) 3.67)",                                  // Полином 1-й степени
-        "(+ (* 9 (sqr x)) (* -6 x) 12)",                        // Полином 2-й степени
-        "(+ (pow x 3) (* -6 (sqr x)) (* 4 x) 17.35)",           // полином 3-й степени
-        "(+ (* -2.34 (pow x 4)) (* -13 (pow x 3)) (* 12 x) 30)" // полином 4-й степени
+    private static String[] _formulas = { 
+        "(* 2 pi)",                                              // Полином 0-й степени
+        "(+ (* 0.24 x) 3.67)",                                   // Полином 1-й степени
+        "(+ (* 9 (sqr x)) (* -6 x) 12)",                         // Полином 2-й степени
+        "(+ (pow x 3) (* -6 (sqr x)) (* 4 x) 17.35)",            // полином 3-й степени
+        "(+ (* -2.34 (pow x 4)) (* -13 (pow x 3)) (* 12 x) 30)", // полином 4-й степени
+        "(+ (* 9 (pow x 5)) (* 24 (pow x 4)) (* -23 (sqr x)) 7)" // полином 5-й степени
     };
 
     // Макмиамльная погрешность вычисления интеграла
-    private static final double _epsilon = 3e-10;
+    private static final double _epsilon = 6e-10;
 
     private static final int _threadsCount = 6;
     private MathFunction[] _functions;
@@ -35,8 +36,8 @@ public class AppTest
 
     @Before
     public void setUp() {
-        _functions = new MathFunction[5];
-        for (int i = 0; i < 5; i++) {
+        _functions = new MathFunction[6];
+        for (int i = 0; i < 6; i++) {
             _functions[i] = new MathFunction(_formulas[i], "x");
         }
 
@@ -294,6 +295,42 @@ public class AppTest
 
         double actualResult = _integralValue.sum();
         double expectedResult = 553.856;
+
+        double delta = Math.abs(expectedResult - actualResult);
+
+        assertTrue(Double.compare(delta, _epsilon) <= 0);
+    }
+
+    // Интегрирование полинома 5-й степени
+    @Test
+    public void integrationOrder_5()
+    {
+        _from = -2;
+        _to = 1;
+
+        _integral = new Integral(_functions[5], ApproxOrder.ORDER_5, Grain.FINE);
+        double subIntervalStep = (_to - _from) / (double) _threadsCount;
+
+        for (int i = 0; i < _threadsCount; i++) {
+            double localFrom = _from + subIntervalStep * i;
+            double localTo = localFrom + subIntervalStep;
+            new Thread(new IntegrationThread(_integral, localFrom, localTo, _integralValue, _startLatch, _finishLatch)).start();
+        }
+
+        try {
+            _startLatch.await();
+        } catch (InterruptedException e) {
+            System.err.println(e.getMessage());
+        }
+
+        try {
+            _finishLatch.await();
+        } catch (InterruptedException e) {
+            System.err.println(e.getMessage());
+        }
+
+        double actualResult = _integralValue.sum();
+        double expectedResult = 15.9;
 
         double delta = Math.abs(expectedResult - actualResult);
 
