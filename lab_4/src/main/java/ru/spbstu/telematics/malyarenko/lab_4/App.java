@@ -186,7 +186,7 @@ public class App {
 
     // Вывод результата интегрирования ----------------------------------------
         if(awaitStatus) {
-            System.out.println("Integral value is: " + integralValue.sum());
+            System.out.printf("Integral value is: %.10f", integralValue.sum());
             System.exit(0);
         } else {
             System.err.println("Integration failed: timeout elapsed");
