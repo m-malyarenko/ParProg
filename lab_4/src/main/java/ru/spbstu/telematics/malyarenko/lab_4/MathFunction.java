@@ -63,7 +63,7 @@ public class MathFunction {
         TAN,
         /** Котангенс */
         COT,
-        /** Експонента */
+        /** Экспонента */
         EXP,
         /** Натуральный логарифм */
         LOG
@@ -83,7 +83,8 @@ public class MathFunction {
         /**
          * Конструктор класса операнда
          * @param type - тип операнда
-         * @param value - значение операнда, если он является числовой константой, иначе значение не учитывается
+         * @param value 1) значение операнда, если он является числовой константой
+         *              2) количество собственных операндов, если опернд является подформулой
          */
         public Operand(OperandType type, double value) {
             _type = type;
@@ -101,7 +102,6 @@ public class MathFunction {
 
     /**
      * Сконструировать класс математической функции
-     * Класс обрабатывает формулы в прямой польской нотации вида: a + b <=> (+ a b)
      * Доступные операции: *, /, +, -, sqr, sqrt, pow, sin, cos, tan, cot, exp, log
      * Доступная константа: pi
      * @param formula - строковое представление формулы в прямой польской записи
@@ -146,7 +146,7 @@ public class MathFunction {
 
     /**
      * Сконструировать копию класса математической функции
-     * @param other - экземляр математической функции
+     * @param other - экземляр класса математической функции
      */
     public MathFunction(MathFunction other) {
         if (other == null) {
@@ -162,7 +162,7 @@ public class MathFunction {
     /**
      * Задать новую формулу математической функции
      * @param formula - строковое представление функции в прямой польской записи
-     * @param variable - название переменной
+     * @param variable - имя переменной
      */
     public void setFormula(String formula, String variable) throws RuntimeException {
 
@@ -355,10 +355,7 @@ public class MathFunction {
     /**
      * Сделать синтаксический разбор формулы в строковом представлении.
      * В результате выполнения создаётся синтаксическое дерево формулы {@code__syntaxTree}
-     * @param formula - строковое представление формулы в прямой польской записи <br>
-     * 
-     * 1) Пример: (* pi (sqr x)) <=> pi*x^2<br>
-     * 2) Пример: (+ (/ (* 2.3 x) (log x)) (sin x) 8) <=> 2.3 * x / log(x) + sin(x) + 8
+     * @param formula - строковое представление формулы в прямой польской записи
      */
     private void parse(String formula) {
         formula = formula.substring(1, formula.length() - 1); // Убрать внешние скобки
@@ -499,7 +496,7 @@ public class MathFunction {
         } else if (operandTypeName.equals(reservedNames[12])) {
             return OperandType.LOG;
         } else {
-            throw new RuntimeException("Unknown operation type");
+            throw new RuntimeException("Unknown operation symbol");
         }
     }
 
